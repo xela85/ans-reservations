@@ -27,8 +27,8 @@ example =
     { events =
         [ { name = "Evénement de test"
           , description = "Ceci est une description"
-          , image = Path "img/ballon.jpg"
+          , image = Path "%PUBLIC_URL%/img/ballon.jpg"
           , date = Nothing
           }
-        ]
+        ]   
     }
