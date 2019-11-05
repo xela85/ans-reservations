@@ -4,8 +4,10 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Messaging exposing (..)
 import Model exposing (Model, example)
 import Navbar exposing (navbar)
+import Page.Events
 import Url exposing (Url)
 
 
@@ -13,7 +15,7 @@ import Url exposing (Url)
 ---- MODEL ----
 
 
-init : flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init : flags -> Url -> Nav.Key -> ( Model, Cmd Message )
 init _ _ _ =
     ( example, Cmd.none )
 
@@ -22,11 +24,7 @@ init _ _ _ =
 ---- UPDATE ----
 
 
-type Msg
-    = NoOp
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Message -> Model -> ( Model, Cmd Message )
 update msg model =
     ( model, Cmd.none )
 
@@ -35,52 +33,27 @@ update msg model =
 ---- VIEW ----
 
 
-view : Model -> Browser.Document Msg
+view : Model -> Browser.Document Message
 view model =
-    { title = "Réservations"
+    { title = Model.pageName model.page
     , body =
         [ navbar
-        , div [ class "row" ]
-            [ div [ class "col s12 m7" ] (List.map displayEvent model.events) ]
+        , Page.Events.display model
         ]
     }
-
-
-displayEvent : Model.Event -> Html Msg
-displayEvent event =
-    div [ class "row" ]
-        [ div [ class "col s12 m7" ]
-            [ div [ class "card" ]
-                [ div [ class "card-image activator" ]
-                    [ img [ src (Model.extractPath event.image) ]
-                        []
-                    , span [ class "card-title" ]
-                        [ text event.name ]
-                    , a [ class "btn-floating btn-large halfway-fab waves-effect waves-light red" ]
-                        [ i [ class "material-icons" ]
-                            [ text "add" ]
-                        ]
-                    ]
-                , div [ class "card-action activator" ]
-                    [ a [ href "#", class "dark-text" ]
-                        [ text "Plus d'infos" ]
-                    ]
-                ]
-            ]
-        ]
 
 
 
 ---- PROGRAM ----
 
 
-main : Program () Model Msg
+main : Program () Model Message
 main =
     Browser.application
         { view = view
         , init = init
         , update = update
         , subscriptions = always Sub.none
-        , onUrlRequest = always NoOp
-        , onUrlChange = always NoOp
+        , onUrlRequest = GoTo
+        , onUrlChange = UrlChanged
         }
