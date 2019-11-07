@@ -1,8 +1,10 @@
-module Page.Events exposing (Model, Msg, display, init)
+module Page.Events exposing (Model, Msg, display, init, update)
 
 import Browser
+import Debug
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Http
 import Model.Event as Event
 import Model.Path as Path
 import Utils.Loading as Loading
@@ -13,12 +15,26 @@ type alias Model =
 
 
 type Msg
-    = NoOp
+    = GotEvents (Result Http.Error (List Event.Event))
 
 
-init : Model
+init : ( Model, Cmd Msg )
 init =
-    { events = Loading.NotLoaded }
+    ( { events = Loading.NotLoaded }, Event.fetchAll GotEvents )
+
+
+update : Model -> Msg -> Model
+update model msg =
+    case msg of
+        GotEvents (Ok events) ->
+            { events = Loading.Loaded events }
+
+        GotEvents (Err err) ->
+            let
+                _ =
+                    Debug.log "Erreur HTTP" (Debug.toString err)
+            in
+            { events = Loading.Error "Erreur lors du chargement des données" }
 
 
 display : Model -> Html Msg
@@ -30,7 +46,10 @@ display model =
                     List.map displayEvent events
 
                 Loading.NotLoaded ->
-                    []
+                    [ text "Chargement..." ]
+
+                Loading.Error str ->
+                    [ text str ]
             )
         ]
 

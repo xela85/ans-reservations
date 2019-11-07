@@ -7,4 +7,4 @@ type Path
 
 extractString : Path -> String
 extractString (Path a) =
-    a
+    "%PUBLIC_URL%/img/" ++ a

@@ -1,10 +1,9 @@
 module Main exposing (..)
 
-import Browser
+import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Html.Attributes exposing (..)
-import Messaging exposing (..)
 import Model.Event as Event
 import Navbar exposing (navbar)
 import Page.Event
@@ -34,7 +33,11 @@ handleRouteSelection : Maybe Route.Route -> ( Model, Cmd Message )
 handleRouteSelection maybeRoute =
     case maybeRoute of
         Just Route.Events ->
-            ( Events Page.Events.init, Cmd.none )
+            let
+                ( m, load ) =
+                    Page.Events.init
+            in
+            ( Events m, Cmd.map GotEventsMsg load )
 
         Just (Route.Event _) ->
             ( Event Page.Event.init, Cmd.none )
@@ -47,9 +50,31 @@ handleRouteSelection maybeRoute =
 ---- UPDATE ----
 
 
+type Message
+    = NoOp
+    | UrlChanged Url
+    | GoTo UrlRequest
+    | GotEventsMsg Page.Events.Msg
+
+
 update : Message -> Model -> ( Model, Cmd Message )
 update msg model =
-    ( model, Cmd.none )
+    case ( model, msg ) of
+        ( Events eventsModel, GotEventsMsg a ) ->
+            ( Page.Events.update eventsModel a, Cmd.none ) |> updateWith Events GotEventsMsg model
+
+        ( _, UrlChanged url ) ->
+            handleRouteSelection (Route.fromUrl url)
+
+        ( _, _ ) ->
+            ( model, Cmd.none )
+
+
+updateWith : (subModel -> Model) -> (subMsg -> Message) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Message )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
 
 
 
@@ -60,7 +85,7 @@ body : Model -> Html Message
 body model =
     case model of
         Events eventsModel ->
-            Page.Events.display eventsModel
+            Html.map GotEventsMsg (Page.Events.display eventsModel)
 
         Event eventModel ->
             Page.Event.display eventModel

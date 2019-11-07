@@ -3,7 +3,6 @@ module Page.Event exposing (Model, display, init)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Messaging exposing (Message)
 import Model.Event as Event
 import Utils.Loading as Loading
 
@@ -17,7 +16,7 @@ init =
     Model Loading.NotLoaded
 
 
-display : Model -> Html Message
+display : Model -> Html msg
 display model =
     div [ class "row" ]
         [ div [ class "col s12 m7" ] [] ]

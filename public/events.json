@@ -2,6 +2,7 @@
     {
         "id": 1,
         "name": "Evénement de test",
-        "image": "ballon.jpg"
+        "image": "ballon.jpg",
+        "description": "Ceci est juste un élément"
     }
 ]
