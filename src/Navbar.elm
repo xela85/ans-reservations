@@ -2,6 +2,7 @@ module Navbar exposing (navbar)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Route
 
 
 navbar : Html a
@@ -12,16 +13,8 @@ navbar =
                 [ text "Logo" ]
             , ul [ id "nav-mobile", class "left hide-on-med-and-down" ]
                 [ li []
-                    [ a [ href "sass.html" ]
-                        [ text "Sass" ]
-                    ]
-                , li []
-                    [ a [ href "badges.html" ]
-                        [ text "Components" ]
-                    ]
-                , li []
-                    [ a [ href "collapsible.html" ]
-                        [ text "JavaScript" ]
+                    [ a [ Route.href Route.Events ]
+                        [ text "Evénements" ]
                     ]
                 ]
             ]
