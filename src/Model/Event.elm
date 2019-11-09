@@ -38,6 +38,14 @@ decoder =
         (Json.Decode.map Path (field "image" string))
 
 
+fetch : Id -> (Result Http.Error (Maybe Event) -> msg) -> Cmd msg
+fetch id eventBuilder =
+    Result.map (Cmd.map eventBuilder) (fetchAll (\a -> a))
+
+getById: Id -> List Event -> Maybe Event
+getById id = List.filter (\element -> element.id == id)
+
+
 fetchAll : (Result Http.Error (List Event) -> msg) -> Cmd msg
 fetchAll eventBuilder =
     Http.get

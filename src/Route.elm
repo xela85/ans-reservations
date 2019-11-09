@@ -14,8 +14,7 @@ type Route
 
 fromUrl : Url -> Maybe Route
 fromUrl url =
-    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
-        |> Parser.parse parser
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing } |> Parser.parse parser
 
 
 href : Route -> Attribute msg

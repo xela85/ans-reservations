@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Model.Event as Event
+import Route
 import Model.Path as Path
 import Utils.Loading as Loading
 
@@ -70,7 +71,7 @@ displayEvent event =
                         ]
                     ]
                 , div [ class "card-action activator" ]
-                    [ a [ href ("/events/" ++ Event.idToString event.id), class "dark-text" ]
+                    [ a [ Route.href (Route.Event event.id), class "dark-text" ]
                         [ text "Plus d'infos" ]
                     ]
                 ]

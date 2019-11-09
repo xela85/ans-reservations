@@ -66,6 +66,9 @@ update msg model =
         ( _, UrlChanged url ) ->
             handleRouteSelection (Route.fromUrl url)
 
+        ( _, GoTo (Browser.Internal url) ) ->
+            handleRouteSelection (Route.fromUrl url)
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
