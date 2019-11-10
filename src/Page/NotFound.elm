@@ -1,6 +1,5 @@
 module Page.NotFound exposing (display)
 
-import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 

@@ -1,5 +1,6 @@
-module Route exposing (Route(..), fromUrl, href)
+module Route exposing (Route(..), fromUrl, href, replaceUrl)
 
+import Browser.Navigation as Nav
 import Html exposing (Attribute)
 import Html.Attributes
 import Model.Event as Event
@@ -15,6 +16,11 @@ type Route
 fromUrl : Url -> Maybe Route
 fromUrl url =
     { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing } |> Parser.parse parser
+
+
+replaceUrl : Nav.Key -> Route -> Cmd msg
+replaceUrl key route =
+    Nav.replaceUrl key (routeToString route)
 
 
 href : Route -> Attribute msg

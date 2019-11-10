@@ -2,16 +2,16 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
+import Debug
 import Html exposing (Html)
 import Html.Attributes exposing (..)
-import Model.Event as Event
-import Navbar exposing (navbar)
+import Model.Event
 import Page.Event
 import Page.Events
 import Page.NotFound
 import Route
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, int, map, oneOf, s, top)
+import View.Navbar exposing (navbar)
 
 
 
@@ -21,29 +21,46 @@ import Url.Parser exposing ((</>), Parser, int, map, oneOf, s, top)
 type Model
     = Events Page.Events.Model
     | Event Page.Event.Model
-    | NotFound
+    | NotFound Nav.Key
 
 
 init : flags -> Url -> Nav.Key -> ( Model, Cmd Message )
-init _ url _ =
-    handleRouteSelection (Route.fromUrl url)
+init _ url navKey =
+    handleRouteSelection navKey (Route.fromUrl url)
 
 
-handleRouteSelection : Maybe Route.Route -> ( Model, Cmd Message )
-handleRouteSelection maybeRoute =
+handleRouteSelection : Nav.Key -> Maybe Route.Route -> ( Model, Cmd Message )
+handleRouteSelection navKey maybeRoute =
     case maybeRoute of
         Just Route.Events ->
             let
                 ( m, load ) =
-                    Page.Events.init
+                    Page.Events.init navKey
             in
             ( Events m, Cmd.map GotEventsMsg load )
 
-        Just (Route.Event _) ->
-            ( Event Page.Event.init, Cmd.none )
+        Just (Route.Event eventId) ->
+            let
+                ( m, load ) =
+                    Page.Event.init navKey eventId
+            in
+            ( Event m, Cmd.map GotEventMsg load )
 
         Nothing ->
-            ( NotFound, Cmd.none )
+            ( NotFound navKey, Cmd.none )
+
+
+toNavKey : Model -> Nav.Key
+toNavKey model =
+    case model of
+        Events eventsModel ->
+            eventsModel.navKey
+
+        Event eventModel ->
+            eventModel.navKey
+
+        NotFound navKey ->
+            navKey
 
 
 
@@ -51,10 +68,10 @@ handleRouteSelection maybeRoute =
 
 
 type Message
-    = NoOp
-    | UrlChanged Url
+    = UrlChanged Url
     | GoTo UrlRequest
     | GotEventsMsg Page.Events.Msg
+    | GotEventMsg Page.Event.Msg
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -63,18 +80,39 @@ update msg model =
         ( Events eventsModel, GotEventsMsg a ) ->
             ( Page.Events.update eventsModel a, Cmd.none ) |> updateWith Events GotEventsMsg model
 
+        ( Event eventModel, GotEventMsg a ) ->
+            ( Page.Event.update eventModel a, Cmd.none ) |> updateWith Event GotEventsMsg model
+
         ( _, UrlChanged url ) ->
-            handleRouteSelection (Route.fromUrl url)
+            handleRouteSelection (toNavKey model) (Route.fromUrl url)
 
         ( _, GoTo (Browser.Internal url) ) ->
-            handleRouteSelection (Route.fromUrl url)
+            case url.fragment of
+                Nothing ->
+                    -- If we got a link that didn't include a fragment,
+                    -- it's from one of those (href "") attributes that
+                    -- we have to include to make the RealWorld CSS work.
+                    --
+                    -- In an application doing path routing instead of
+                    -- fragment-based routing, this entire
+                    -- `case url.fragment of` expression this comment
+                    -- is inside would be unnecessary.
+                    ( model, Cmd.none )
+
+                Just _ ->
+                    ( model
+                    , Nav.pushUrl (toNavKey model) (Url.toString url)
+                    )
+
+        ( _, GoTo (Browser.External href) ) ->
+            ( model, Nav.load href )
 
         ( _, _ ) ->
             ( model, Cmd.none )
 
 
 updateWith : (subModel -> Model) -> (subMsg -> Message) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Message )
-updateWith toModel toMsg model ( subModel, subCmd ) =
+updateWith toModel toMsg _ ( subModel, subCmd ) =
     ( toModel subModel
     , Cmd.map toMsg subCmd
     )
@@ -91,9 +129,9 @@ body model =
             Html.map GotEventsMsg (Page.Events.display eventsModel)
 
         Event eventModel ->
-            Page.Event.display eventModel
+            Html.map GotEventMsg (Page.Event.display eventModel)
 
-        NotFound ->
+        NotFound _ ->
             Page.NotFound.display
 
 
@@ -103,10 +141,10 @@ pageName model =
         Events _ ->
             "Evénements"
 
-        Event eventId ->
-            "Détails de l'événement "
+        Event _ ->
+            "Détails de l'événement"
 
-        NotFound ->
+        NotFound _ ->
             "Page non trouvée"
 
 

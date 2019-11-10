@@ -1,4 +1,4 @@
-module Model.Event exposing (Event, Id(..), fetchAll, idToString, urlParser)
+module Model.Event exposing (Event, Id(..), fetchAll, fetchById, idToString, urlParser)
 
 import Http
 import Json.Decode exposing (Decoder, field, int, list, map4, string)
@@ -38,12 +38,13 @@ decoder =
         (Json.Decode.map Path (field "image" string))
 
 
-fetch : Id -> (Result Http.Error (Maybe Event) -> msg) -> Cmd msg
-fetch id eventBuilder =
-    Result.map (Cmd.map eventBuilder) (fetchAll (\a -> a))
-
-getById: Id -> List Event -> Maybe Event
-getById id = List.filter (\element -> element.id == id)
+fetchById : Id -> (Result Http.Error (Maybe Event) -> msg) -> Cmd msg
+fetchById id eventBuilder =
+    let
+        getById =
+            List.filter (\element -> element.id == id) >> List.head
+    in
+    Cmd.map (Result.map getById >> eventBuilder) (fetchAll identity)
 
 
 fetchAll : (Result Http.Error (List Event) -> msg) -> Cmd msg
