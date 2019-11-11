@@ -1,6 +1,6 @@
-module Utils.Loading exposing (Loading(..), display, fromHttpResult)
+module Model.Loading exposing (Loading(..), display, fromHttpResult)
 
-import Html exposing (Html, div, text)
+import Html exposing (..)
 import Html.Attributes exposing (class)
 import Http exposing (Error(..))
 
@@ -62,7 +62,14 @@ display loading mapper =
                 ]
 
         Error str ->
-            text str
+            div [ class "container" ]
+                [ div [ class "card-panel red white-text" ]
+                    [ h3 [] [ text "Une erreur a été rencontrée" ]
+                    , p [] [ b [] [ text "Veuillez contacter l'administrateur en lui fournissant les informations ci-dessous." ] ]
+                    , span []
+                        [ text str ]
+                    ]
+                ]
 
         Loaded data ->
             mapper data

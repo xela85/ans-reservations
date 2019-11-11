@@ -6,9 +6,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Model.Event as Event
+import Model.Loading as Loading
 import Model.Path as Path
 import Route
-import Utils.Loading as Loading
 import View.Image exposing (image)
 
 

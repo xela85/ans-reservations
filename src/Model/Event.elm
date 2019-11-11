@@ -1,8 +1,10 @@
 module Model.Event exposing (Event, Id(..), fetchAll, fetchById, idToString, urlParser)
 
 import Http
-import Json.Decode exposing (Decoder, field, int, list, map4, string)
+import Json.Decode exposing (Decoder, field, float, int, list, map6, string)
+import LngLat
 import Model.Path exposing (Path(..))
+import Model.Position as Position exposing (Position)
 import Time exposing (Posix)
 import Url.Parser
 
@@ -11,6 +13,8 @@ type alias Event =
     { id : Id
     , name : String
     , description : String
+    , position : Position
+    , price : Float
     , image : Path
     }
 
@@ -31,10 +35,12 @@ urlParser =
 
 decoder : Decoder Event
 decoder =
-    map4 Event
+    map6 Event
         (Json.Decode.map Id (field "id" int))
         (field "name" string)
         (field "description" string)
+        (field "position" Position.decoder)
+        (field "price" float)
         (Json.Decode.map Path (field "image" string))
 
 

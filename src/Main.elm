@@ -9,6 +9,7 @@ import Model.Event
 import Page.Event
 import Page.Events
 import Page.NotFound
+import Port.MapCommands
 import Route
 import Url exposing (Url)
 import View.Navbar exposing (navbar)
@@ -81,7 +82,7 @@ update msg model =
             ( Page.Events.update eventsModel a, Cmd.none ) |> updateWith Events GotEventsMsg model
 
         ( Event eventModel, GotEventMsg a ) ->
-            ( Page.Event.update eventModel a, Cmd.none ) |> updateWith Event GotEventsMsg model
+            Page.Event.update eventModel a |> updateWith Event GotEventMsg model
 
         ( _, UrlChanged url ) ->
             handleRouteSelection (toNavKey model) (Route.fromUrl url)

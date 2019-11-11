@@ -8,8 +8,9 @@
 [data-elm-hot="true"] {
   height: inherit; }
 
-html, body {
-  height: 100%; }
+.mapboxgl-canvas-container {
+  height: 500px;
+  margin-bottom: 100px; }
 
 .full-width-container {
   width: 100%;
