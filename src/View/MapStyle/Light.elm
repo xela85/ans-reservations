@@ -2902,7 +2902,7 @@ style lngLat =
             [ Style.sprite "mapbox://sprites/mapbox/light-v9"
             , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
             , Style.name "Light"
-            , Style.defaultZoomLevel 5
+            , Style.defaultZoomLevel 15
             , Style.defaultCenter lngLat
             ]
         }

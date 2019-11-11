@@ -7,8 +7,10 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Mapbox.Cmd.Option as Opt
+import Maybe.Extra exposing (toList)
 import Model.Event as Event
 import Model.Loading as Loading
+import Model.Location exposing (Location)
 import Model.Path as Path
 import Port.MapCommands as MapCommands
 import View.Image exposing (fullWidthImage)
@@ -43,11 +45,11 @@ update model msg =
 
 display : Model -> Html Msg
 display model =
-    Loading.display model.event displayEvent
+    Loading.display model.event viewEvent
 
 
-displayEvent : Maybe Event.Event -> Html Msg
-displayEvent maybeEvent =
+viewEvent : Maybe Event.Event -> Html Msg
+viewEvent maybeEvent =
     div []
         (case maybeEvent of
             Just event ->
@@ -60,11 +62,27 @@ displayEvent maybeEvent =
                             [ text "shopping_basket" ]
                         , "Ajouter au panier pour " ++ String.fromFloat event.price ++ " €" |> text
                         ]
-                    , h3 [] [ text "Lieu" ]
-                    , View.Map.map event.position.lngLat
+                    , viewEventLocation event.location
                     ]
                 ]
 
             Nothing ->
                 [ text "L'évènement recherché n'a pas été trouvé" ]
         )
+
+
+displayPos : Location -> Maybe (Html msg)
+displayPos pos =
+    Maybe.map (\elem -> b [] [ text elem ]) pos.name
+
+
+viewEventLocation : Location -> Html Msg
+viewEventLocation position =
+    h3 [] [ text "Lieu" ]
+        :: toList (Maybe.map (\elem -> b [] [ text elem, br [] [] ]) position.name)
+        ++ [ text position.street
+           , br [] []
+           , position.postalCode ++ " " ++ position.city |> text
+           , div [ class "map-container" ] [ View.Map.map position.lngLat ]
+           ]
+        |> div []
