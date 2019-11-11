@@ -14,6 +14,12 @@
   margin-top: 10px;
   margin-bottom: 100px; }
 
+.price {
+  line-height: 36px;
+  height: 36px;
+  font-size: 2em;
+  margin-right: 5px; }
+
 .full-width-container {
   width: 100%;
   height: 300px;

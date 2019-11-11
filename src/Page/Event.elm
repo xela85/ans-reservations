@@ -56,12 +56,8 @@ viewEvent maybeEvent =
                 [ fullWidthImage event.image
                 , div [ class "container" ]
                     [ h1 [ onClick Click ] [ text event.name ]
+                    , viewPrice event
                     , p [] [ text event.description ]
-                    , a [ class "waves-effect waves-light btn blue" ]
-                        [ i [ class "material-icons left" ]
-                            [ text "shopping_basket" ]
-                        , "Ajouter au panier pour " ++ String.fromFloat event.price ++ " €" |> text
-                        ]
                     , viewEventLocation event.location
                     ]
                 ]
@@ -71,9 +67,16 @@ viewEvent maybeEvent =
         )
 
 
-displayPos : Location -> Maybe (Html msg)
-displayPos pos =
-    Maybe.map (\elem -> b [] [ text elem ]) pos.name
+viewPrice : Event.Event -> Html Msg
+viewPrice event =
+    div []
+        [ span [ class "price" ] [ String.fromFloat event.price ++ " €" |> text ]
+        , a [ class "waves-effect waves-light btn blue" ]
+            [ i [ class "material-icons left" ]
+                [ text "shopping_basket" ]
+            , text "Ajouter au panier"
+            ]
+        ]
 
 
 viewEventLocation : Location -> Html Msg
