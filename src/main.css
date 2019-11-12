@@ -14,11 +14,15 @@
   margin-top: 10px;
   margin-bottom: 100px; }
 
-.price {
-  line-height: 36px;
-  height: 36px;
-  font-size: 2em;
-  margin-right: 5px; }
+.price-container {
+  display: flex;
+  align-items: center; }
+  .price-container .price {
+    line-height: 36px;
+    height: 36px;
+    font-size: 2em; }
+  .price-container button {
+    margin-left: 15px; }
 
 .full-width-container {
   width: 100%;

@@ -1,6 +1,7 @@
 module Page.Events exposing (Model, Msg, display, init, update)
 
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -20,9 +21,14 @@ type Msg
     = GotEvents (Loading.Loading (List Event.Event))
 
 
-init : Session -> ( Model, Cmd Msg )
+init : Nav.Key -> ( Model, Cmd Msg )
 init session =
-    ( { session = session, events = Loading.NotLoaded }, Event.fetchAll (Loading.fromHttpResult >> GotEvents) )
+    ( { session = session, events = Loading.NotLoaded }, Event.fetchById id (Loading.fromHttpResult >> GotEvent) )
+
+
+fetchBasket : Basket -> Cmd Msg
+fetchBasket basket =
+    Cmd.batch (List.map (\event -> Event.fetchById event.id Loading.fromHttpResult) (Basket.items basket))
 
 
 update : Model -> Msg -> Model

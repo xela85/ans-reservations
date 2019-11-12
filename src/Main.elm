@@ -6,6 +6,7 @@ import Debug
 import Html exposing (Html)
 import Html.Attributes exposing (..)
 import Model.Event
+import Model.Session as Session exposing (Session)
 import Page.Event
 import Page.Events
 import Page.NotFound
@@ -22,46 +23,46 @@ import View.Navbar exposing (navbar)
 type Model
     = Events Page.Events.Model
     | Event Page.Event.Model
-    | NotFound Nav.Key
+    | NotFound Session
 
 
 init : flags -> Url -> Nav.Key -> ( Model, Cmd Message )
 init _ url navKey =
-    handleRouteSelection navKey (Route.fromUrl url)
+    handleRouteSelection (Session.new navKey) (Route.fromUrl url)
 
 
-handleRouteSelection : Nav.Key -> Maybe Route.Route -> ( Model, Cmd Message )
-handleRouteSelection navKey maybeRoute =
+handleRouteSelection : Session -> Maybe Route.Route -> ( Model, Cmd Message )
+handleRouteSelection session maybeRoute =
     case maybeRoute of
         Just Route.Events ->
             let
                 ( m, load ) =
-                    Page.Events.init navKey
+                    Page.Events.init session
             in
             ( Events m, Cmd.map GotEventsMsg load )
 
         Just (Route.Event eventId) ->
             let
                 ( m, load ) =
-                    Page.Event.init navKey eventId
+                    Page.Event.init session eventId
             in
             ( Event m, Cmd.map GotEventMsg load )
 
         Nothing ->
-            ( NotFound navKey, Cmd.none )
+            ( NotFound session, Cmd.none )
 
 
-toNavKey : Model -> Nav.Key
-toNavKey model =
+toSession : Model -> Session
+toSession model =
     case model of
         Events eventsModel ->
-            eventsModel.navKey
+            eventsModel.session
 
         Event eventModel ->
-            eventModel.navKey
+            eventModel.session
 
-        NotFound navKey ->
-            navKey
+        NotFound session ->
+            session
 
 
 
@@ -85,7 +86,7 @@ update msg model =
             Page.Event.update eventModel a |> updateWith Event GotEventMsg model
 
         ( _, UrlChanged url ) ->
-            handleRouteSelection (toNavKey model) (Route.fromUrl url)
+            handleRouteSelection (toSession model) (Route.fromUrl url)
 
         ( _, GoTo (Browser.Internal url) ) ->
             case url.fragment of
@@ -102,7 +103,7 @@ update msg model =
 
                 Just _ ->
                     ( model
-                    , Nav.pushUrl (toNavKey model) (Url.toString url)
+                    , Nav.pushUrl (toSession model |> .nav) (Url.toString url)
                     )
 
         ( _, GoTo (Browser.External href) ) ->
@@ -153,7 +154,7 @@ view : Model -> Browser.Document Message
 view model =
     { title = pageName model
     , body =
-        [ navbar
+        [ toSession model |> navbar
         , body model
         ]
     }
